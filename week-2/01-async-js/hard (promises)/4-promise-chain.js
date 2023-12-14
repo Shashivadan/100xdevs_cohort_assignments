@@ -6,7 +6,7 @@
  */
 
 function waitOneSecond() {
-
+    
 }
 
 function waitTwoSecond() {

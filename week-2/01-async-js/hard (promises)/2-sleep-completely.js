@@ -3,6 +3,15 @@
  * During this time the thread should not be able to do anything else.
  */
 
-function sleep (seconds) {
+function sleep (milliseconds) {
 
+    console.log("start");
+    return new Promise((resolve)=>{
+        setTimeout(()=>
+        {
+        resolve("excuted")
+        },milliseconds)
+    })
 }
+
+sleep(9000).then((data)=>{console.log(data);})

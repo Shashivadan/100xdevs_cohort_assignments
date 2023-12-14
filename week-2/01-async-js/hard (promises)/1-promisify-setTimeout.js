@@ -3,4 +3,20 @@
 */
 
 function wait(n) {
+
+    const pro = new Promise((reslove)=>{
+
+        setTimeout(function(){
+            reslove("scdshgcfj")
+        },n*1000)
+
+    });
+
+    return pro
+    
 }
+
+let ans = wait(8)
+ans.then((data)=>{
+    console.log(data);
+})
