@@ -4,22 +4,11 @@
  * the function should return a promise just like before
  */
 
-<<<<<<< HEAD
-function sleep (milliseconds) {
-
-    console.log("start");
-    return new Promise((resolve)=>{
-        setTimeout(()=>
-        {
-        resolve("excuted")
-        },milliseconds)
-    })
-}
-
-sleep(9000).then((data)=>{console.log(data);})
-=======
 function sleep(milliseconds) {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, milliseconds);
+  });
 }
-
 module.exports = sleep;
->>>>>>> a89f27a5191bfb3b539213f7adf5c1a83e21a948
