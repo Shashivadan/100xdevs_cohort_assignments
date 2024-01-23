@@ -10,12 +10,12 @@ async function adminMiddleware(req, res, next) {
 
   if (admin.password === password && admin.username === username) {
     res.json({
-      message: "sussfully logined",
+      message: "successfully logged",
     });
     return next();
   }
   res.status(404).json({
-    message: "worng username and password",
+    message: "wrong username and password",
   });
 }
 
