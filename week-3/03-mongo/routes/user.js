@@ -1,26 +1,29 @@
 const { Router } = require("express");
 const router = Router();
-const { User, Course } = require("../middleware/user");
+const { User, Course } = require("../db/index");
+const userMiddleware = require("../middleware/user");
 
 // User Routes
-router.post("/signup", (req, res) => {
+router.post("/signup", async (req, res) => {
   // Implement user signup logic
+  console.log(req.body);
   const username = req.body.username;
   const password = req.body.password;
 
-  const ExitsingUser = User.findOne({ username });
+  const ExitsingUser = await User.findOne({ username: username });
+
   if (ExitsingUser) {
     return res.json({
       message: "user already exists",
     });
   }
 
-  const newUser = new User({
+  const newUser = await User.create({
     username: username,
     password: password,
-  }).save();
+  });
   res.json({
-    message: "Admin created successfully",
+    message: "user created successfully",
   });
 });
 
@@ -38,17 +41,18 @@ router.post("/courses/:courseId", userMiddleware, async (req, res) => {
 
   const user = await User.findOne({ username });
   const course = await Course.findOne({ _id: courseId });
-  if (course) {
-    user.courses.push(course);
-    user.save();
+
+  if (!course) {
     res.json({
       message: "course purchased successfully",
     });
-  } else {
-    res.status(400).json({
-      message: "course not found",
-    });
   }
+
+  User.updateOne({ username: username }, { $push: { courses: course } });
+
+  res.json({
+    message: "course purchased successfully",
+  });
 });
 
 router.get("/purchasedCourses", userMiddleware, async (req, res) => {
@@ -63,7 +67,7 @@ router.get("/purchasedCourses", userMiddleware, async (req, res) => {
     });
   }
   res.status(200).json({
-    coursePurchased: user.courses,
+    coursePurchased: user.Courses,
   });
 });
 

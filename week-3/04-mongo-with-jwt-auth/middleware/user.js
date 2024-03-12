@@ -6,34 +6,22 @@ const { User } = require("../db/index");
 async function userMiddleware(req, res, next) {
   // Implement user auth logic
   // You need to check the headers and validate the user from the user DB. Check readme for the exact headers to be expected
+
+  const authorization = req.headers.authorization;
+
+  if (!authorization || !authorization.startsWith("bearer ")) {
+    res.status(404).josn({});
+  }
   try {
-    const auth = req.headers.Authorization;
-
-    const decode = jwt.verify(auth, secretKey);
-    if (!decode) {
-      res.status(404).json({
-        message: "wrong authorized key",
-      });
-    }
-
-    const user = await User.findOne({ username: decode.username });
-
-    if (!user) {
-      res.status(404).json({
-        message: "user not found",
-      });
-    }
-
-    if (
-      user.username === decode.username &&
-      user.password === decode.password
-    ) {
+    const decode = jwt.verify(authorization.split(" ")[1], secretKey);
+    if (decode.username) {
       next();
+    } else {
+      res.status(404).josn({});
     }
   } catch (err) {
-    console.log(err);
-    res.status(404).json({
-      message: err,
+    res.status(404).josn({
+      msg: err,
     });
   }
 }

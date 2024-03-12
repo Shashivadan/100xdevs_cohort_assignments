@@ -35,6 +35,7 @@ function signJwt(username, password) {
     },
     jwtPassword
   );
+  // console.log(sign);
   return sign;
 }
 
@@ -49,6 +50,7 @@ function signJwt(username, password) {
 function verifyJwt(token) {
   try {
     const verifyToken = jwt.verify(token, jwtPassword);
+    // console.log(verifyToken);
     if (verifyToken) {
       return true;
     }
@@ -71,6 +73,7 @@ function verifyJwt(token) {
 function decodeJwt(token) {
   // Your code here
   const decodeToken = jwt.decode(token);
+  console.log(decodeToken);
   if (decodeToken) {
     return true;
   } else {

@@ -7,10 +7,10 @@ async function userMiddleware(req, res, next) {
   const username = req.headers.username;
   const password = req.headers.password;
 
-  const user = await User.findOne({ username });
+  const user = await User.findOne({ username: username, password: password });
 
-  if (user.password === password && user.username === username) {
-    return next();
+  if (user) {
+    next();
   }
   res.json({
     message: "wrong username and password",

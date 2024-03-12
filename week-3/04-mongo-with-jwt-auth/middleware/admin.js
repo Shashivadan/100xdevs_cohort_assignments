@@ -9,14 +9,21 @@ async function adminMiddleware(req, res, next) {
   // You need to check the headers and validate the admin from the admin DB. Check readme for the exact headers to be expected
   try {
     const auth = req.headers.Authorization;
-      // const password = req.headers.password;
-    if (!auth) {
+    // const password = req.headers.password;
+    if (!auth || !auth.startsWith("Bearer ")) {
       res.status(404).json({
         message: "not authorized key",
       });
     }
-    const decode = jwt.verify(auth, secretKey);
-    const admin = await Admin.findOne({ username: decode.username });
+
+    const decode = jwt.verify(auth.split("")[1], secretKey);
+
+    if (!decode) {
+      res.status(404).json({
+        message: "not authorized",
+      });
+    }
+    // const admin = await Admin.findOne({ username: decode.username });
 
     if (!admin) {
       res.status(404).json({
@@ -24,12 +31,13 @@ async function adminMiddleware(req, res, next) {
       });
     }
 
-    if (
-      admin.password === decode.password &&
-      admin.username === decode.username
-    ) {
-      next();
-    }
+    // if (
+    //   admin.password === decode.password &&
+    //   admin.username === decode.username
+    // ) {
+    //   next();
+    // }
+    next();
   } catch (err) {
     console.log(err);
     res.status(404).jsgon({

@@ -14,7 +14,12 @@ const UserSchema = new mongoose.Schema({
   // Schema definition here
   username: String,
   password: String,
-  Courses: Array,
+  Courses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+    },
+  ],
 });
 
 const CourseSchema = new mongoose.Schema({
@@ -23,7 +28,6 @@ const CourseSchema = new mongoose.Schema({
   description: String,
   price: Number,
   imageLink: String,
-  CourseId: Number,
   // published: Boolean,
 });
 

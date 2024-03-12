@@ -13,6 +13,8 @@
     }
 
     function removeTodoFromDom(todo) {
+      let element = document.getElementsByid(todo.id);
+      element.parent.removeChild(element);
       
     }
 

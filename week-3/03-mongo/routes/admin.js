@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const adminMiddleware = require("../middleware/admin");
+// const userMiddleware = require("../middleware/user");
 const router = Router();
 
 const { Admin, Course } = require("../db/index");
@@ -10,16 +11,18 @@ router.post("/signup", async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
 
-  const ExitsingUser = await Admin.findOne({ username });
+  const ExitsingUser = await Admin.findOne({ username: username });
+
   if (ExitsingUser) {
     return res.json({
       message: "user already exists",
     });
   }
-  const addAdmin = new Admin({
+  const addAdmin = Admin.create({
     username: username,
     password: password,
-  }).save();
+  });
+
   res.status(200).json({
     message: "Admin created successfully",
   });
@@ -27,12 +30,12 @@ router.post("/signup", async (req, res) => {
 
 router.post("/courses", adminMiddleware, async (req, res) => {
   // Implement course creation logic
-  const newCourse = new Course({
+  const newCourse = Course.create({
     title: req.body.title,
     description: req.body.description,
     price: req.body.price,
     image: req.body.image,
-  }).save();
+  });
 
   res.json({
     message: "Course created successfully",
