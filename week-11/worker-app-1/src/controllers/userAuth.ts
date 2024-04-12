@@ -1,12 +1,10 @@
-import { PrismaClient } from "@prisma/client";
-
 import { Context } from "hono";
-
 import { signupScheme, signInSchema } from "../utils/zodUtils";
 import { Jwt } from "hono/utils/jwt";
-import { z } from "zod";
+import { withAccelerate } from "@prisma/extension-accelerate";
+// const prisma = new PrismaClient().$extends(withAccelerate());
 
-const prisma = new PrismaClient();
+import { PrismaClient } from "@prisma/client/edge";
 
 enum ErrorCodes {
   ErrorNotFound = 404,
@@ -23,6 +21,9 @@ type SignUpTypes = {
 
 async function signUp(c: Context) {
   try {
+    const prisma = new PrismaClient({
+      datasourceUrl: c.env.DATABASE_URL,
+    }).$extends(withAccelerate());
     const body: SignUpTypes = await c.req.json();
 
     const { success } = signupScheme.safeParse(body);
@@ -46,6 +47,11 @@ async function signUp(c: Context) {
         email: body.email,
         username: body.username,
         password: body.password,
+      },
+      select: {
+        email: true,
+        username: true,
+        id: true,
       },
     });
 
@@ -76,7 +82,48 @@ type signInType = {
 };
 
 async function signIn(c: Context) {
-  const body: signInType = await c.req.json();
+  try {
+    const prisma = new PrismaClient({
+      datasourceUrl: c.env.DATABASE_URL,
+    }).$extends(withAccelerate());
+    const body: signInType = await c.req.json();
+
+    const { success } = signInSchema.safeParse(body);
+
+    if (!success) {
+      return c.status(ErrorCodes.NotAcceptable);
+    }
+
+    const user = await prisma.users.findFirst({
+      where: {
+        email: body.email,
+        password: body.password,
+      },
+      select: {
+        email: true,
+        username: true,
+        id: true,
+      },
+    });
+
+    if (!user) {
+      return c.status(ErrorCodes.Unauthorized);
+    }
+
+    const userId = user.id;
+
+    const token = Jwt.sign(userId, "1234");
+    return c.json({
+      token,
+      userInfo: {
+        username: user.username,
+        email: user.email,
+        userId: user.id,
+      },
+    });
+  } catch (error) {
+    return c.body("Internal server error" + error, ErrorCodes.InternalError);
+  }
 }
 
 export { signUp };
