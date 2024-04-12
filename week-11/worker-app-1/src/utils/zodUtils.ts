@@ -6,4 +6,8 @@ const signupScheme = z.object({
   password: z.string().min(4),
 });
 
-export { signupScheme };
+const signInSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(4),
+});
+export { signupScheme, signInSchema };

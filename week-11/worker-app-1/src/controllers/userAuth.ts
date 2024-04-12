@@ -2,8 +2,9 @@ import { PrismaClient } from "@prisma/client";
 
 import { Context } from "hono";
 
-import { signupScheme } from "../utils/zodUtils";
+import { signupScheme, signInSchema } from "../utils/zodUtils";
 import { Jwt } from "hono/utils/jwt";
+import { z } from "zod";
 
 const prisma = new PrismaClient();
 
@@ -11,6 +12,7 @@ enum ErrorCodes {
   ErrorNotFound = 404,
   NotAcceptable = 406,
   Unauthorized = 401,
+  InternalError = 500,
 }
 
 type SignUpTypes = {
@@ -19,7 +21,7 @@ type SignUpTypes = {
   email: string;
 };
 
-async function signup(c: Context) {
+async function signUp(c: Context) {
   try {
     const body: SignUpTypes = await c.req.json();
 
@@ -40,7 +42,11 @@ async function signup(c: Context) {
     }
 
     const newUser = await prisma.users.create({
-      data: body,
+      data: {
+        email: body.email,
+        username: body.username,
+        password: body.password,
+      },
     });
 
     if (!newUser) {
@@ -60,6 +66,17 @@ async function signup(c: Context) {
       },
     });
   } catch (error) {
-    return c.body("Internal server error" + error, 500);
+    return c.body("Internal server error" + error, ErrorCodes.InternalError);
   }
 }
+
+type signInType = {
+  email: string;
+  password: string;
+};
+
+async function signIn(c: Context) {
+  const body: signInType = await c.req.json();
+}
+
+export { signUp };

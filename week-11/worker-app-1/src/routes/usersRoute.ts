@@ -1,5 +1,8 @@
 import { Hono } from "hono";
+import { signUp } from "../controllers/userAuth";
 
-const router = new Hono();
+const userRouter = new Hono();
 
-router.post("/signup");
+userRouter.post("/signup", signUp);
+
+export default userRouter;
