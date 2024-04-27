@@ -24,6 +24,7 @@ async function signUp(c: Context) {
     const prisma = new PrismaClient({
       datasourceUrl: c.env.DATABASE_URL,
     }).$extends(withAccelerate());
+
     const body: SignUpTypes = await c.req.json();
 
     const { success } = signupScheme.safeParse(body);
@@ -39,7 +40,10 @@ async function signUp(c: Context) {
     });
 
     if (existingUser) {
-      return c.status(ErrorCodes.Unauthorized);
+      return c.json(
+        { message: "user already exists" },
+        ErrorCodes.Unauthorized
+      );
     }
 
     const newUser = await prisma.users.create({
@@ -56,12 +60,16 @@ async function signUp(c: Context) {
     });
 
     if (!newUser) {
-      return c.status(ErrorCodes.ErrorNotFound);
+      c.status(ErrorCodes.ErrorNotFound);
+      return c.json(
+        { message: "user is not created" },
+        ErrorCodes.ErrorNotFound
+      );
     }
 
     const userId = newUser.id;
 
-    const token = Jwt.sign(userId, "1234");
+    const token = await Jwt.sign(userId, c.env.SECRET_KEY);
 
     return c.json({
       token,
@@ -91,7 +99,7 @@ async function signIn(c: Context) {
     const { success } = signInSchema.safeParse(body);
 
     if (!success) {
-      return c.status(ErrorCodes.NotAcceptable);
+      return c.json({ message: "not Acceptable" }, ErrorCodes.NotAcceptable);
     }
 
     const user = await prisma.users.findFirst({
@@ -107,12 +115,12 @@ async function signIn(c: Context) {
     });
 
     if (!user) {
-      return c.status(ErrorCodes.Unauthorized);
+      return c.json({ messgae: "unauthorized" }, ErrorCodes.Unauthorized);
     }
 
     const userId = user.id;
 
-    const token = Jwt.sign(userId, "1234");
+    const token = await Jwt.sign(userId, c.env.SECRET_KEY);
     return c.json({
       token,
       userInfo: {
@@ -126,4 +134,4 @@ async function signIn(c: Context) {
   }
 }
 
-export { signUp };
+export { signUp, signIn };
