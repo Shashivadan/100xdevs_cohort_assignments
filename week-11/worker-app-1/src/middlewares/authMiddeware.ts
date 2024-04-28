@@ -2,15 +2,16 @@ import { Context, Next } from "hono";
 import { Jwt } from "hono/utils/jwt";
 
 async function authMiddleware(c: Context, next: Next) {
-  const token = c.req.header("token");
-  if (!token) return c.json({ message: "token is not provided" }, 401);
   try {
-    const decode = await Jwt.verify(token, c.env.SECRET_KEY);
-    if (!decode) return c.json({ message: "not acceptable" }, 401);
+    const token = await c.req.header("token");
+    if (!token || token.startsWith("Bearer "))
+      return c.json({ message: "token is not provided" }, 401);
+    const decode = await Jwt.verify(token.split(" ")[1], c.env.SECRET_KEY);
+    if (!decode) return c.json({ message: "Not acceptable" }, 401);
     c.set("userId", decode);
-    next();
+    await next();
   } catch (error) {
-    return c.json({ message: "Internal Server Error" }, 500);
+    return c.json({ message: "Internal Server Error" + error }, 500);
   }
 }
 
