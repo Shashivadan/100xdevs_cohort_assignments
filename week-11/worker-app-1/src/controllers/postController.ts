@@ -182,4 +182,60 @@ async function deleteBlogById(c: Context) {
   }
 }
 
-export { allPosts, userPosts, createPost, getPostById, deleteBlogById };
+type UpdateType = {
+  title: string;
+  body: string;
+};
+
+async function updatePost(c: Context) {
+  const prisma = new PrismaClient({
+    datasourceUrl: c.env.DATABASE_URL,
+  }).$extends(withAccelerate());
+  try {
+    const id: number = await Number(c.req.param("id"));
+    const { title, body }: UpdateType = await c.req.json();
+
+    const postExists = await prisma.posts.findUnique({
+      where: {
+        id: id,
+        userId: c.get("userId"),
+      },
+    });
+    if (!postExists) {
+      return c.json({ message: "Post Not Exists" });
+    }
+
+    const updatePost = await prisma.posts.update({
+      where: {
+        userId: c.get("userId"),
+        id: id,
+      },
+      data: {
+        title,
+        body,
+      },
+    });
+
+    if (!postExists) {
+      return c.json(
+        {
+          message: "post not updated",
+        },
+        403
+      );
+    }
+
+    return c.json({ updatePost });
+  } catch (error) {
+    return c.json({ message: "Internal Server Error : " + error }, 500);
+  }
+}
+
+export {
+  allPosts,
+  userPosts,
+  createPost,
+  getPostById,
+  deleteBlogById,
+  updatePost,
+};
