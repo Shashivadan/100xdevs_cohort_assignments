@@ -76,6 +76,10 @@ async function createPost(c: Context) {
 
     const newTag: string[] = tags.split(",").map((tag) => tag.trim());
 
+    if (newTag.length > 10) {
+      return c.json({ message: "there must be only 10 tags only" }, 403);
+    }
+
     const newPost = await prisma.posts.create({
       data: {
         userId: c.get("userId"),

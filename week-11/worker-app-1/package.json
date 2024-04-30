@@ -10,6 +10,7 @@
     "cors": "^2.8.5",
     "hono": "^4.2.3",
     "jsonwebtoken": "^9.0.2",
+    "tsc": "^2.0.4",
     "zod": "^3.22.4"
   },
   "devDependencies": {
